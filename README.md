@@ -91,13 +91,9 @@ After confirmation, it removes the app launcher, desktop entry, icon, and instal
 
 ## Browser right-click menu
 
-The installer registers the `free-video-downloader://` link handler. In a Chromium-based browser (Chrome, Brave, Edge, and similar), install the context-menu extension:
+A Chromium extension is included for testing and future store distribution. It adds **Download video with Free Video Downloader** to the right-click menu on videos and opens the Linux desktop app with the selected link. Choose a video resolution or audio-only MP3 quality in the app to start downloading. For YouTube, the extension sends the watch page URL so yt-dlp can inspect available formats; on other sites it uses a direct HTTP(S) video URL when available and otherwise sends the page URL. The browser may ask permission the first time it opens the desktop app. Firefox is not supported yet.
 
-1. Open `chrome://extensions` (or the browser's equivalent) and enable **Developer mode**.
-2. Click **Load unpacked** and select the `browser-extension` folder in the project checkout. For the quick install, it is usually `~/.local/share/free-video-downloader/source/browser-extension`.
-3. Right-click a video and choose **Download video with Free Video Downloader**.
-
-The app opens and analyzes the link. Choose a video resolution or audio-only MP3 quality to start downloading automatically. For YouTube, the extension sends the watch page URL so yt-dlp can find available formats; on other sites it uses a direct HTTP(S) video URL when available and otherwise sends the page URL. The browser may ask permission the first time it opens the desktop app. Firefox is not supported by this extension yet.
+The extension is not yet published in the Chrome Web Store. Until it is approved and published, load the `browser-extension` folder through the browser's **Load unpacked** developer option to test it. The Web Store package and listing materials are in `store-assets/` and can be rebuilt with `scripts/package-browser-extension.sh`.
 
 ## Download a video
 

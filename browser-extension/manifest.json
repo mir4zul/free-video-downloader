@@ -1,8 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Free Video Downloader context menu",
+  "name": "Free Video Downloader",
   "version": "1.0.0",
-  "description": "Send a video under the pointer to Free Video Downloader on Linux.",
+  "description": "Send a video to the Free Video Downloader desktop app on Linux.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "permissions": ["contextMenus"],
   "background": {
     "service_worker": "background.js"
