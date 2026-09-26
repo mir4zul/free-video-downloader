@@ -20,21 +20,28 @@ def main():
     icons.mkdir(parents=True, exist_ok=True)
     icon.write_bytes((app_root / "app/assets/downloader.svg").read_bytes())
     project = shlex.quote(str(app_root))
+    icon_entry = str(icon).replace("\\", "\\\\").replace(" ", "\\s").replace("\t", "\\t")
     binary.write_text("#!/bin/sh\nset -eu\nexec " + shlex.quote(uv_executable) + " run --locked --project " + project + " free-video-downloader \"$@\"\n")
     binary.chmod(0o755)
     # Desktop Exec quoting follows the Desktop Entry spec and supports spaces in home paths.
     executable = str(binary).replace("\\", "\\\\").replace('"', '\\"')
-    desktop.write_text("""[Desktop Entry]
-Type=Application
-Name=Free Video Downloader
-Comment=Download a video at the resolution you choose
-Exec=""" + '"' + executable + '"' + """
-Terminal=false
-Icon=free-video-downloader
-Categories=AudioVideo;Video;
-StartupNotify=true
-""")
+    desktop.write_text(
+        "[Desktop Entry]\n"
+        "Type=Application\n"
+        "Name=Free Video Downloader\n"
+        "Comment=Download a video at the resolution you choose\n"
+        f'Exec="{executable}"\n'
+        "Terminal=false\n"
+        f"Icon={icon_entry}\n"
+        "Categories=AudioVideo;Video;\n"
+        "StartupNotify=true\n"
+    )
     desktop.chmod(0o644)
+    desktop_database = shutil.which("update-desktop-database")
+    if desktop_database:
+        import subprocess
+        subprocess.run([desktop_database, str(applications)], check=False,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 if __name__ == "__main__":
