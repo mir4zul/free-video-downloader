@@ -83,7 +83,8 @@ fi
 
 mkdir -p "$FVD_DATA_ROOT"
 if [[ -d "$FVD_SOURCE_DIR/.git" ]]; then
-    printf 'Using the existing checkout at %s\n' "$FVD_SOURCE_DIR"
+    printf 'Updating the existing checkout at %s\n' "$FVD_SOURCE_DIR"
+    git -C "$FVD_SOURCE_DIR" pull --ff-only
 elif [[ -e "$FVD_SOURCE_DIR" ]]; then
     printf 'Cannot install: %s exists and is not a Git checkout.\n' "$FVD_SOURCE_DIR" >&2
     exit 1

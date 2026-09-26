@@ -59,6 +59,8 @@ bash install-free-video-downloader.sh
 
 The installer checks for Git, Python, FFmpeg, and Node.js or Deno. If system tools are missing, it asks before installing them with `pacman` or `apt` and may prompt for your sudo password. It installs `uv` for your user, downloads Python 3.11 through `uv`, prepares the app, and adds a launcher to the desktop app menu. Do not run it with `sudo`.
 
+To update an existing installation, download and run the same installer again. It fast-forward updates the installed checkout, syncs dependencies, and refreshes the desktop launcher. It keeps your download history, settings, and downloaded files.
+
 ### Run from an existing checkout
 
 If you already cloned this repository, install the locked Python dependencies and launch the app:
