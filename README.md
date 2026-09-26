@@ -26,7 +26,7 @@ The selected height and width are checked with FFprobe after download. If they d
 - FFmpeg and FFprobe
 - Deno or Node.js for JavaScript-dependent YouTube extraction features
 
-The app checks for required components but does not install system packages automatically.
+The app itself only checks for required components. The quick installer below can install missing system packages after asking for your confirmation.
 
 ### Arch Linux
 
@@ -45,20 +45,33 @@ Install Python 3.11+ if the distribution's `python3` package is older. Deno is o
 
 ## Install and run
 
-From the project folder, install the locked Python dependencies and launch the app:
+### Quick install (Arch Linux and Ubuntu)
+
+Download and run the installer:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mir4zul/free-video-downloader/main/install.sh -o install-free-video-downloader.sh
+bash install-free-video-downloader.sh
+```
+
+The installer checks for Git, Python, FFmpeg, and Node.js or Deno. If system tools are missing, it asks before installing them with `pacman` or `apt` and may prompt for your sudo password. It installs `uv` for your user, downloads Python 3.11 through `uv`, prepares the app, and adds a launcher to the desktop app menu. Do not run it with `sudo`.
+
+### Run from an existing checkout
+
+If you already cloned this repository, install the locked Python dependencies and launch the app:
 
 ```bash
 uv sync --locked
 uv run --locked free-video-downloader
 ```
 
-To add a launcher to your desktop app menu for the current user:
+To add a launcher for the current user from the checkout:
 
 ```bash
 ./scripts/install-user.sh
 ```
 
-The launcher refers to this project folder, so reinstall it if you move the folder. To run directly from a checkout, use `./scripts/run.sh`.
+The desktop launcher uses the installed `uv` executable directly. To run from a development checkout, use `./scripts/run.sh`.
 
 ## Download a video
 
