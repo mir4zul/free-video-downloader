@@ -1,6 +1,7 @@
 include README.md
 include uv.lock
 include install.sh
+include uninstall.sh
 recursive-include scripts *.sh *.py
 recursive-include app *.py
 recursive-include tests *.py

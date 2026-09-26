@@ -73,6 +73,17 @@ To add a launcher for the current user from the checkout:
 
 The desktop launcher uses the installed `uv` executable directly. To run from a development checkout, use `./scripts/run.sh`.
 
+### Uninstall
+
+Download and run the uninstaller:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mir4zul/free-video-downloader/main/uninstall.sh -o uninstall-free-video-downloader.sh
+bash uninstall-free-video-downloader.sh
+```
+
+After confirmation, it removes the app launcher, desktop entry, icon, and installer-managed source checkout. It keeps your download history, settings, downloaded videos, and shared system tools such as `uv`, FFmpeg, and Node.js.
+
 ## Download a video
 
 1. Paste a link and click **Analyze**.
