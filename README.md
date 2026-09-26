@@ -6,7 +6,8 @@ A free desktop app for downloading videos from YouTube and other websites suppor
 
 - Preview a video's thumbnail, title, duration, and available resolutions.
 - Choose a source resolution, including 720p, 1080p, 1440p (often called 2K), or 2160p (4K) when available.
-- Automatically select a suitable output container from the source formats. The app may use MP4, WebM, or MKV; there is no separate MP3/MP4 mode selector.
+- Switch to **Audio only (MP3)** to extract audio from a supported video link; choose an MP3 bitrate.
+- Automatically select a suitable video container from the source formats. Video downloads may use MP4, WebM, or MKV; audio-only downloads use MP3.
 - Show download progress, speed, ETA, queue status, and processing state.
 - Queue downloads, limit simultaneous jobs and parallel fragments, cancel or retry jobs, and resume supported partial downloads.
 - Save download history and settings locally; open completed files or their folders.
@@ -14,7 +15,9 @@ A free desktop app for downloading videos from YouTube and other websites suppor
 
 ## Format and quality behavior
 
-The resolution list comes from formats actually offered by the source. The app does not upscale or re-encode video. It selects a compatible source container automatically: for example, MP4 with AAC audio can be saved as MP4, WebM with Opus/Vorbis as WebM, and incompatible mixed streams may be merged into MKV without re-encoding.
+In Video mode, the resolution list comes from formats actually offered by the source. The app does not upscale or re-encode video. It selects a compatible source container automatically: for example, MP4 with AAC audio can be saved as MP4, WebM with Opus/Vorbis as WebM, and incompatible mixed streams may be merged into MKV without re-encoding.
+
+In **Audio only (MP3)** mode, the app extracts audio from a supported video link and offers 128, 192, 256, and 320 kbps output settings. Choosing a higher bitrate does not improve the original source quality. FFmpeg is required for conversion.
 
 The selected height and width are checked with FFprobe after download. If they do not match the selected resolution, the job is not marked complete. A resolution being available during analysis does not guarantee that the source will allow a successful download.
 
@@ -88,7 +91,7 @@ After confirmation, it removes the app launcher, desktop entry, icon, and instal
 
 1. Paste a link and click **Analyze**.
 2. Review the preview and available resolutions.
-3. Select a resolution and destination folder.
+3. Choose **Video** and select a resolution, or choose **Audio only (MP3)** and select a bitrate.
 4. Click **Download / Add to queue**.
 5. Follow the job in **Downloads & history**. Open the verified file or its folder when it completes.
 

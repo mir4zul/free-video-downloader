@@ -76,7 +76,7 @@ class MainWindow(QMainWindow):
         title = label("Free Video Downloader")
         title.setObjectName("title")
         layout.addWidget(title)
-        layout.addWidget(label("Choose your resolution. Keep the original video quality.", True))
+        layout.addWidget(label("Choose a video resolution or download audio only.", True))
 
         link_row = QHBoxLayout()
         self.url = QLineEdit()
@@ -108,7 +108,16 @@ class MainWindow(QMainWindow):
         preview_layout.addWidget(self.metadata)
         layout.addWidget(preview)
 
-        self.format_label = label("Video quality")
+        layout.addWidget(label("Download mode"))
+        self.mode = QComboBox()
+        self.mode.setAccessibleName("Download mode")
+        self.mode.addItem("Video", "video")
+        self.mode.addItem("Audio only (MP3)", "audio")
+        self.mode.setEnabled(False)
+        self.mode.currentIndexChanged.connect(self.update_mode)
+        layout.addWidget(self.mode)
+
+        self.format_label = label("Resolution")
         layout.addWidget(self.format_label)
         self.quality = QComboBox()
         self.quality.setAccessibleName("Output quality")
@@ -153,20 +162,27 @@ class MainWindow(QMainWindow):
         self.refresh_dependencies()
 
     def update_mode(self):
-        self.format_label.setText("Resolution")
+        audio_mode = self.mode.currentData() == "audio"
+        self.format_label.setText("MP3 bitrate" if audio_mode else "Resolution")
+        self.quality.setAccessibleName("MP3 bitrate" if audio_mode else "Output resolution")
         self.quality.clear()
-        choices = self.video_choices
+        choices = self.audio_choices if audio_mode else self.video_choices
         for choice in choices:
             self.quality.addItem(choice.label, choice)
         if not choices:
-            self.quality.addItem("No compatible format available" if self.info else "Available after link analysis")
+            unavailable = "No audio format available" if audio_mode else "No compatible video format available"
+            self.quality.addItem(unavailable if self.info else "Available after link analysis")
         self.quality.setEnabled(bool(choices))
+        self.mode.setEnabled(bool(self.info))
         self.selection_changed()
 
     def selection_changed(self, *_):
         choice = self.quality.currentData()
+        no_choice = ("No audio-only format is available for this link."
+                     if self.mode.currentData() == "audio" else
+                     "No usable video with audio was found. Try another link.")
         self.selection.setText(choice.details if choice else
-            "No usable video with audio was found. Try another link."
+            no_choice
             if self.info else "Choose a link to see available formats.")
         self.download.setEnabled(bool(choice) and self.job is None)
 
@@ -175,6 +191,7 @@ class MainWindow(QMainWindow):
         self.info = None
         self.video_choices = []
         self.audio_choices = []
+        self.mode.setCurrentIndex(0)
         self.preview.clear()
         self.preview.setText("Video preview")
         self.metadata.setText("Analyze the link to view title, duration and available formats.")
