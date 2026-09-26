@@ -1,0 +1,6 @@
+include README.md
+include uv.lock
+recursive-include scripts *.sh *.py
+recursive-include app *.py
+recursive-include tests *.py
+recursive-include app/assets *.svg
