@@ -1,143 +1,143 @@
 # Free Video Downloader — Linux
 
-Linux-এর জন্য একটি ফ্রি desktop downloader তৈরির পরিকল্পনা। YouTube বা অন্য supported website-এর video link দিলে আগে video preview এবং available format দেখাবে। এরপর পছন্দমতো video বা audio download করা যাবে।
+A free desktop downloader for Linux. Paste a video link from YouTube or another supported website to view its preview and available formats, then download the video at your chosen resolution.
 
-**বর্তমান অবস্থা:** Step 1–5 implementation সম্পূর্ণ / OK। Step 6-এর automated tests, Arch Wayland launcher check, installer ও package build যাচাই হয়েছে। Real 720p–4K media playback/download, Ubuntu ও X11 যাচাই বাকি; তাই release validation আংশিক সম্পূর্ণ।
+**Current status:** Steps 1–5 are implemented. Step 6 automated tests, the Arch Wayland launcher check, installer, and package builds have been verified. Real 720p–4K media downloads and playback, Ubuntu, and X11 remain unverified, so release validation is partially complete.
 
-## বর্তমান নির্বাচন পদ্ধতি
+## How format selection works
 
-ব্যবহারকারীর সংশোধিত নির্দেশ অনুযায়ী MP3/MP4 mode selector সরানো হয়েছে। এখন শুধু resolution নির্বাচন করতে হয়। নিচের পুরোনো milestone records-এ আগের MP4/MP3 implementation-এর বিবরণ ঐতিহাসিক তথ্য; নতুন interface-এ সেগুলো selection হিসেবে নেই। পূর্বে সংরক্ষিত MP3 queue/history-এর compatibility রাখা হয়েছে।
+Following the user's updated requirements, the MP3/MP4 mode selector has been removed. You now choose only a resolution. The older milestone records below describe the earlier MP4/MP3 implementation for historical context; those are not choices in the current interface. Compatibility with previously saved MP3 queue/history entries is retained.
 
-## ব্যবহার করার ধাপ
+## How to use
 
-1. Video link paste করে **Analyze** চাপুন।
-2. Thumbnail, title, duration এবং available quality দেখুন।
-3. Available resolution (যেমন 720p, 1080p, 1440p/2K, 2160p/4K) বেছে নিন।
-4. Source অনুযায়ী automatic output container দেখুন; format আলাদা করে বাছতে হয় না।
-5. Save folder নির্বাচন করে **Download** চাপুন।
-6. Progress, speed, remaining time এবং processing status দেখুন। শেষ হলে file বা folder খুলুন।
+1. Paste a video link and click **Analyze**.
+2. Review the thumbnail, title, duration, and available qualities.
+3. Choose an available resolution, such as 720p, 1080p, 1440p/2K, or 2160p/4K.
+4. The output container is selected automatically based on the source; you do not choose a format separately.
+5. Choose a save folder and click **Download**.
+6. Follow the progress, speed, remaining time, and processing status. When complete, open the file or its folder.
 
-## ফিচারের লক্ষ্য
+## Feature goals
 
-| বিষয় | পরিকল্পনা |
+| Area | Plan |
 | --- | --- |
-| Platform | প্রথম লক্ষ্য Arch Linux ও Ubuntu; অন্য Linux distro-তে dependency ও compatibility যাচাই সাপেক্ষে |
-| Link | YouTube এবং downloader engine সমর্থিত অন্য website |
+| Platform | Arch Linux and Ubuntu first; other Linux distributions depend on dependency and compatibility checks |
+| Links | YouTube and other websites supported by the download engine |
 | Preview | Thumbnail, title, duration, source |
-| Video | Source অনুযায়ী MP4/WebM/অন্য supported container; source-এ থাকলে 360p, 480p, 720p, 1080p, 1440p (সাধারণভাবে 2K বলা হয়), 2160p (4K) |
-| Audio | নির্বাচিত ভিডিওর সঙ্গে source audio; নতুন download-এ audio-only/MP3 selector নেই |
-| Format details | Resolution, FPS, codec এবং জানা থাকলে file size; estimate হলে তা উল্লেখ |
-| Progress | Percentage, downloaded bytes, speed, ETA; merging/conversion-এর আলাদা status |
-| Controls | Cancel, retry, queue, supported downloads resume |
-| Storage | Folder picker, filename, completed download history |
-| Speed | Supported fragmented streams-এ সীমিত parallel downloading; অপ্রয়োজনীয় conversion এড়ানো |
+| Video | MP4/WebM/other supported containers according to the source; 360p, 480p, 720p, 1080p, 1440p (commonly called 2K), and 2160p (4K) when available from the source |
+| Audio | Source audio paired with the selected video; new downloads have no audio-only/MP3 selector |
+| Format details | Resolution, FPS, codec, and file size when known; estimates are labeled |
+| Progress | Percentage, downloaded bytes, speed, ETA, and separate merging/conversion status |
+| Controls | Cancel, retry, queue, and resume supported downloads |
+| Storage | Folder picker, filenames, and completed download history |
+| Speed | Limited parallel downloading for supported fragmented streams; avoid unnecessary conversion |
 
-## Linux compatibility, interface ও speed পরিকল্পনা
+## Linux compatibility, interface, and speed plan
 
-- **Arch ও Ubuntu:** দুই distro-র জন্য আলাদা dependency/setup নির্দেশনা থাকবে। Python dependencies isolated environment-এ রাখার পরিকল্পনা, যাতে system Python-এর সঙ্গে সংঘাত না হয়। Release-এর সময় পরীক্ষিত distro ও version লিখতে হবে।
-- **Desktop compatibility:** Wayland ও X11-এ launch, scaling, folder picker এবং file opening পরীক্ষা করা হবে। অন্য distro পরীক্ষা না হলে সেটিকে verified বলা হবে না।
-- **Interface:** পরিষ্কার layout, readable text, video preview, স্পষ্ট resolution selector ও প্রধান Download button থাকবে। Analysis, downloading, merging, completed ও failed state আলাদা করে দেখাবে; দীর্ঘ কাজে window freeze হবে না।
-- **Network ব্যবহার:** Default-এ app-এর নিজস্ব speed cap থাকবে না। Supported streams-এ configurable parallel fragments ব্যবহার করা হবে; অতিরিক্ত concurrency-তে error বাড়লে কমানোর সুযোগ থাকবে।
-- **Speed display:** চলমান transfer-এর speed ও ETA দেখাবে; এটি internet package-এর advertised speed নয়। Source এবং network যতটুকু অনুমতি দেয় ততটুকু ব্যবহার করার লক্ষ্য থাকবে।
-- **যাচাইয়ের শর্ত:** Arch ও Ubuntu-তে install, link analysis, MP4/MP3 download এবং playback পরীক্ষা পাস করতে হবে। Speed তুলনায় একই source ও network ব্যবহার করে ফল লিখতে হবে; পরীক্ষা ছাড়া “full speed” দাবি করা হবে না।
+- **Arch and Ubuntu:** Provide separate setup instructions for both distributions. Python dependencies should stay in an isolated environment to avoid conflicts with system Python. List the tested distributions and versions for each release.
+- **Desktop compatibility:** Test launch, scaling, folder selection, and file opening on Wayland and X11. Do not call another distribution verified until it has been tested.
+- **Interface:** Use a clear layout with readable text, video preview, an obvious resolution selector, and a primary Download button. Show analysis, downloading, merging, completed, and failed states separately; long-running work must not freeze the window.
+- **Network use:** The app has no built-in speed cap by default. Use configurable parallel fragments for supported streams, with an option to lower concurrency if it causes more errors.
+- **Speed display:** Show transfer speed and ETA; these are not the advertised speed of the user's internet plan. Aim to use the capacity allowed by the source and network.
+- **Verification criteria:** Pass install, link analysis, MP4/MP3 download, and playback checks on Arch and Ubuntu. Compare speed using the same source and network and report the results; do not claim “full speed” without testing.
 
-## বাস্তব সীমা
+## Practical limitations
 
-- সব website বা সব link কাজ করবে এমন নিশ্চয়তা নেই। Unsupported, unavailable বা login-required link হলে পরিষ্কার error দেখাবে।
-- Source-এ যে resolution আছে শুধু সেটিই দেখাবে; 720p video থেকে আসল 4K তৈরি করবে না।
-- MP4 একটি container; codec compatibility আলাদা বিষয়। দ্রুত download-এর জন্য compatible streams merge করা হবে। Conversion দরকার হলে সময় লাগার বিষয়টি আগে দেখাবে।
-- MP3 bitrate বাড়ালে source audio-এর আসল quality বাড়ে না।
-- Download speed internet connection, source server এবং throttling-এর ওপর নির্ভর করে; নির্দিষ্ট speed নিশ্চিত করা যাবে না।
+- Not every website or link is guaranteed to work. Show a clear error for unsupported, unavailable, or login-required links.
+- Only show resolutions available from the source; do not create real 4K from a 720p video.
+- MP4 is a container; codec compatibility is a separate matter. Merge compatible streams for faster downloads. If conversion is required, show that it may take time.
+- Increasing an MP3 bitrate does not improve the source audio quality.
+- Download speed depends on the internet connection, source server, and throttling; a specific speed cannot be guaranteed.
 
-## প্রস্তাবিত প্রযুক্তি ও গঠন
+## Proposed technology and architecture
 
-- **Python + PySide6:** Linux desktop interface।
-- **yt-dlp:** Video information, available formats এবং download engine।
-- **FFmpeg / ffprobe:** Video/audio merge, MP3 conversion এবং output verification।
-- **Background worker:** Analysis, download ও conversion চললেও interface responsive থাকবে।
-- **Local settings/history:** Save folder ও download history রাখা হবে।
-- **Dependency check:** yt-dlp, FFmpeg এবং YouTube extraction-এর জন্য প্রয়োজনীয় JavaScript runtime/components পরীক্ষা করে setup নির্দেশনা দেখাবে।
-- **Process execution:** URL shell command হিসেবে চালানো হবে না; argument list ব্যবহার করা হবে এবং cancel করলে child process বন্ধ হবে।
+- **Python + PySide6:** Linux desktop interface.
+- **yt-dlp:** Video information, available formats, and download engine.
+- **FFmpeg / ffprobe:** Merge video and audio, convert to MP3, and verify output.
+- **Background worker:** Keep the interface responsive during analysis, downloads, and conversion.
+- **Local settings/history:** Store the save folder and download history.
+- **Dependency check:** Check yt-dlp, FFmpeg, and the JavaScript runtime/components needed for YouTube extraction, then show setup instructions.
+- **Process execution:** Never pass URLs as shell commands; use an argument list and stop the child process when canceled.
 
-প্রস্তাবিত code layout: `app/ui/`, `app/services/`, `app/workers/`, `app/storage/`, `tests/`। Implementation-এর সময় dependency versions ও install commands যাচাই করে যোগ করা হবে।
+Proposed code layout: `app/ui/`, `app/services/`, `app/workers/`, `app/storage/`, `tests/`. Dependency versions and installation commands will be verified and added during implementation.
 
-## কাজের চেকলিস্ট
+## Work checklist
 
-`[x]` = শেষ / OK; `[ ]` = বাকি। কাজ implement এবং উপযুক্তভাবে verify হওয়ার পরই সংশ্লিষ্ট checkbox update হবে।
+`[x]` = complete / OK; `[ ]` = remaining. Update a checkbox only after the task has been implemented and appropriately verified.
 
-### 1. পরিকল্পনা
+### 1. Planning
 
-- [x] চাহিদা, user flow এবং feature scope লেখা — OK
-- [x] প্রস্তাবিত প্রযুক্তি ও বাস্তব সীমা নির্ধারণ — OK
-- [x] README এবং ধাপে ধাপে checklist তৈরি — OK
-- [x] Arch/Ubuntu compatibility ও অন্য distro যাচাইয়ের পরিকল্পনা লেখা — OK
-- [x] সুন্দর responsive interface ও network speed ব্যবহারের লক্ষ্য লেখা — OK
+- [x] Document requirements, user flow, and feature scope — OK
+- [x] Define proposed technology and practical limitations — OK
+- [x] Create the README and step-by-step checklist — OK
+- [x] Document the Arch/Ubuntu compatibility plan and checks for other distributions — OK
+- [x] Document goals for a polished responsive interface and network speed use — OK
 
 ### 2. Project setup
 
-- [x] Python project, dependencies ও application entry point তৈরি — OK
-- [x] Main window, URL input, Analyze button ও folder picker তৈরি — OK
-- [x] Readable layout, preview area ও পরিষ্কার Video/Audio controls তৈরি — OK
-- [x] Dependency detection এবং প্রয়োজনীয় setup নির্দেশনা যোগ — OK
+- [x] Create the Python project, dependencies, and application entry point — OK
+- [x] Create the main window, URL input, Analyze button, and folder picker — OK
+- [x] Create a readable layout, preview area, and clear Video/Audio controls — OK
+- [x] Add dependency detection and required setup instructions — OK
 
-### 3. Link analysis ও format নির্বাচন
+### 3. Link analysis and format selection
 
-- [x] Background-এ link analyze এবং thumbnail/title/duration দেখানো — OK
-- [x] Available video/audio formats থেকে সঠিক options তৈরি — OK
-- [x] MP4 quality selector এবং MP3 bitrate selector তৈরি — OK
-- [x] Unavailable format, invalid link এবং source error handle করা — OK
-- [x] নির্বাচিত output format, quality ও সম্ভাব্য size দেখানো — OK
+- [x] Analyze links in the background and show thumbnail/title/duration — OK
+- [x] Build the correct options from available video/audio formats — OK
+- [x] Create an MP4 quality selector and an MP3 bitrate selector — OK
+- [x] Handle unavailable formats, invalid links, and source errors — OK
+- [x] Show the selected output format, quality, and estimated size — OK
 
-### 4. Download ও conversion
+### 4. Download and conversion
 
-- [x] নির্বাচিত video ও audio streams download এবং merge — OK
-- [x] Audio-only download ও MP3 conversion — OK
-- [x] Progress, speed, ETA এবং processing status দেখানো — OK
-- [x] Cancel/retry এবং supported partial download resume — OK
-- [x] Output file verify হওয়ার পরেই completed দেখানো — OK
+- [x] Download and merge the selected video and audio streams — OK
+- [x] Download audio only and convert to MP3 — OK
+- [x] Show progress, speed, ETA, and processing status — OK
+- [x] Add cancel/retry and resume supported partial downloads — OK
+- [x] Mark a download complete only after verifying the output file — OK
 
-### 5. Speed ও ব্যবহার সুবিধা
+### 5. Speed and usability
 
-- [x] Configurable fragment concurrency যোগ; প্রথমে 4 দিয়ে পরীক্ষা — OK
-- [x] Default speed cap ছাড়া transfer এবং live speed/ETA যাচাই — OK
-- [x] Network failure-এ সীমিত retry এবং backoff — OK
-- [x] Download queue ও একসঙ্গে download-এর সীমা — OK
-- [x] Settings, history এবং open file/folder actions — OK
-- [x] Duplicate filename, low disk space ও write permission error handle করা — OK
+- [x] Add configurable fragment concurrency; test with 4 initially — OK
+- [x] Verify transfers have no default speed cap and show live speed/ETA — OK
+- [x] Add limited retries and backoff for network failures — OK
+- [x] Add a download queue and limit simultaneous downloads — OK
+- [x] Add settings, history, and open file/folder actions — OK
+- [x] Handle duplicate filenames, low disk space, and write permission errors — OK
 
-### 6. যাচাই ও release — 2026-09-26
+### 6. Verification and release — 2026-09-26
 
-- [x] Resolution-based format selection, quality/container labels, mismatch rejection, error handling ও queue tests
-- [ ] Real YouTube link-এ 720p/1080p/2K/4K media download, output resolution ও playback
-- [x] Local media fixtures-এ MP4/WebM/MKV merge, playback decode, exact resolution match/mismatch verification
-- [x] Cancel, HTTP retry/backoff, interrupted partial resume, child-process cleanup ও verification failure tests
-- [x] 1 বনাম 4 fragments, একই throttled HLS fixture; environment ও ফল নিচে লেখা
-- [x] Linux launch script, user desktop launcher, build artifacts এবং installation guide তৈরি
-- [ ] Arch-এ real supported media download/playback যাচাই; শুধু YouTube format analysis সফল হয়েছে
-- [ ] Ubuntu install/download/playback: এই host Arch; Docker socket access অনুমতি দেয়নি, তাই Ubuntu যাচাই করা যায়নি
-- [x] Wayland session-এ user desktop launcher দিয়ে launch; 125% scaling-এ offscreen UI tests
-- [ ] X11 session, native interactive folder/file opening যাচাই; বর্তমান session Wayland, path-opening test desktop service mock ব্যবহার করে
-- [x] Clean temporary Python environment-এ wheel install করে offscreen app launch
-- [x] PyPI sdist ও wheel build সফল; sdist-এ user installation scripts আছে
+- [x] Resolution-based format selection, quality/container labels, mismatch rejection, error handling, and queue tests
+- [ ] Download media from real YouTube links at 720p/1080p/2K/4K, then verify output resolution and playback
+- [x] Merge local MP4/WebM/MKV fixtures, decode playback, and verify exact resolution match/mismatch
+- [x] Test cancellation, HTTP retry/backoff, interrupted partial resume, child-process cleanup, and verification failures
+- [x] Compare 1 vs. 4 fragments on the same throttled HLS fixture; record environment and results below
+- [x] Create Linux launch script, user desktop launcher, build artifacts, and installation guide
+- [ ] Verify real supported media download/playback on Arch; only YouTube format analysis has succeeded
+- [ ] Verify Ubuntu install/download/playback: this host is Arch; Docker socket access was denied, so Ubuntu could not be tested
+- [x] Launch through the user desktop launcher on Wayland; run offscreen UI tests at 125% scaling
+- [ ] Verify an X11 session and native interactive folder/file opening; this session is Wayland, and the path-opening test uses a desktop service mock
+- [x] Install the wheel in a clean temporary Python environment and launch the app offscreen
+- [x] Build PyPI sdist and wheel successfully; the sdist includes user installation scripts
 
-## প্রথম ব্যবহারযোগ্য সংস্করণের শর্ত
+## First usable release criteria
 
-Link paste → preview → available resolution নির্বাচন → folder নির্বাচন → download → resolution-verified output file। পুরো কাজের সময় UI responsive থাকবে এবং failure হলে completed দেখাবে না। এরপর queue, history ও speed tuning শেষ করা হবে।
+Paste a link → preview → choose an available resolution → choose a folder → download → receive a resolution-verified output file. The interface must remain responsive throughout and must never report completion on failure. Then complete queue, history, and speed tuning.
 
 ## Reference
 
-Engine capabilities, format selection, dependencies এবং download options-এর ভিত্তি: [yt-dlp official documentation](https://github.com/yt-dlp/yt-dlp#readme)।
+Engine capabilities, format selection, dependencies, and download options are based on the [official yt-dlp documentation](https://github.com/yt-dlp/yt-dlp#readme).
 
-## Development setup ও চালানো
+## Development setup and launch
 
-Python 3.11+ এবং `uv` প্রয়োজন। Project folder থেকে:
+Python 3.11+ and `uv` are required. From the project folder:
 
 ```bash
 uv sync --locked
 uv run --locked free-video-downloader
 ```
 
-বিকল্পভাবে Python virtual environment দিয়ে:
+Alternatively, use a Python virtual environment:
 
 ```bash
 python3 -m venv .venv
@@ -145,28 +145,28 @@ python3 -m venv .venv
 .venv/bin/python -m app
 ```
 
-`uv.lock` নির্দিষ্ট dependency versions রাখে; pip-এর বিকল্পটি lock file ব্যবহার করে না। PySide6-এর bundled Qt ব্যবহার হবে; system Python-এ package install প্রয়োজন নেই। [Qt setup documentation](https://doc.qt.io/qtforpython-6/gettingstarted.html)।
+`uv.lock` pins dependency versions; the pip alternative does not use the lock file. The app uses the Qt bundled with PySide6; installing packages into system Python is not required. See the [Qt setup documentation](https://doc.qt.io/qtforpython-6/gettingstarted.html).
 
-Download engine-এর system dependencies:
+System dependencies for the download engine:
 
 ```bash
 # Arch Linux
 sudo pacman -Syu python uv ffmpeg deno
 
-# Ubuntu (Deno optional; installed Node also works)
+# Ubuntu (Deno is optional; installed Node also works)
 sudo apt update
 sudo apt install ffmpeg python3 python3-venv
 ```
 
-Ubuntu-তে Deno setup-এর জন্য [official installation guide](https://docs.deno.com/runtime/getting_started/installation/) অনুসরণ করুন। Arch-এর [Deno package](https://archlinux.org/packages/extra/x86_64/deno/) ব্যবহার করা যাবে। App-এর **Check setup** PySide6, yt-dlp, yt-dlp-ejs, FFmpeg/ffprobe ও Deno অথবা Node পাওয়া যাচ্ছে কি না দেখায়; এটি version compatibility বা বাস্তব download পরীক্ষা নয়। Deno না থাকলে installed Node analysis-এর জন্য enable করা হয়। কোনো system package নিজে থেকে install করে না।
+For Deno on Ubuntu, follow the [official installation guide](https://docs.deno.com/runtime/getting_started/installation/). On Arch, use the [Deno package](https://archlinux.org/packages/extra/x86_64/deno/). The app's **Check setup** checks for PySide6, yt-dlp, yt-dlp-ejs, FFmpeg/ffprobe, and Deno or Node; it does not verify version compatibility or perform a real download. If Deno is missing, installed Node is enabled as a fallback for analysis. The app does not install system packages automatically.
 
-Link paste করে **Analyze** চাপলে title, duration, thumbnail ও source-এর available formats দেখা যায়। Resolution এবং folder বেছে **Download / Add to queue** চাপুন। কাজ শেষে verified output file-এর path দেখাবে।
+Paste a link and click **Analyze** to see the title, duration, thumbnail, and formats available from the source. Choose a resolution and folder, then click **Download / Add to queue**. When complete, the app shows the verified output file path.
 
-Arch/Ubuntu-তে user-level launcher ও desktop app entry বসাতে project folder-এ `./scripts/install-user.sh` চালান। আগে `uv`, Python 3 এবং FFmpeg/ffprobe install থাকতে হবে; script Ubuntu/Arch package manager থেকে system dependency নিজে install করে না। Desktop app menu-তে “Free Video Downloader” দেখা যাবে। Source folder সরালে launcher-টি reinstall করুন। Development থেকে সরাসরি চালাতে `./scripts/run.sh` ব্যবহার করুন।
+To install a user-level launcher and desktop app entry on Arch/Ubuntu, run `./scripts/install-user.sh` from the project folder. Install `uv`, Python 3, and FFmpeg/ffprobe first; the script does not install system dependencies through the Ubuntu/Arch package manager. **Free Video Downloader** will appear in the desktop app menu. If you move the source folder, reinstall the launcher. To launch directly from a development checkout, use `./scripts/run.sh`.
 
-Analysis চলার সময় **Cancel** করা যায়; 90 সেকেন্ডে timeout হয়। নতুন link লিখলে পুরোনো metadata ও selection মুছে যায়। Thumbnail পাওয়া না গেলেও format নির্বাচন করা যায়। Playlist, live/upcoming stream, DRM-only source এবং unusable formats-এর ক্ষেত্রে error দেখায়।
+You can cancel analysis with **Cancel**; it times out after 90 seconds. Entering a new link clears old metadata and selections. Formats remain selectable if a thumbnail is unavailable. Playlists, live/upcoming streams, DRM-only sources, and unusable formats produce an error.
 
-Resolution তালিকা source video formats থেকে তৈরি হয়; MP4-only filter নেই। নির্বাচিত resolution-এর সঙ্গে container নাম selector-এ দেখায়। MP4+AAC হলে MP4, WebM+Opus/Vorbis হলে WebM; অন্য mixed combination-এ MKV ব্যবহার করে codec re-encode ছাড়া audio/video merge হয়। আগে থেকেই audio থাকা file তার supported source container রাখে। Video re-encode বা upscale হয় না। Download শেষে নির্বাচিত height/width FFprobe দিয়ে মিলিয়ে দেখে; mismatch হলে Completed দেখায় না।
+The resolution list is built from source video formats; there is no MP4-only filter. The selector shows the container alongside the selected resolution. MP4+AAC uses MP4; WebM+Opus/Vorbis uses WebM; other mixed combinations use MKV to merge audio/video without re-encoding codecs. Files that already contain audio keep their supported source container. Video is not re-encoded or upscaled. After download, FFprobe checks the selected height/width; a mismatch is not marked Completed.
 
 Headless interface checks:
 
@@ -174,53 +174,53 @@ Headless interface checks:
 QT_QPA_PLATFORM=offscreen uv run --locked python -m unittest discover -s tests -v
 ```
 
-### Step 2 যাচাই
+### Step 2 verification
 
-- Arch host-এ isolated environment install ও `uv sync --locked --offline` সফল।
-- দুইটি automated test পাস: missing dependencies report; folder নির্বাচন/cancel এবং Video/Audio mode switching।
-- Offscreen Qt window render করে layout দেখা হয়েছে; syntax check পাস।
-- Step 2 পরীক্ষায় এই host-এ FFmpeg/ffprobe ও Python dependencies ছিল; Deno missing দেখানো হয়েছিল। Step 3-এ installed Node fallback যুক্ত হয়েছে।
-- Native Wayland/X11 session, Ubuntu এবং বাস্তব download এখনো পরীক্ষা হয়নি; এগুলো পরবর্তী checklist-এ বাকি আছে।
+- Installation in an isolated environment on the Arch host and `uv sync --locked --offline` succeeded.
+- Two automated tests passed: reporting missing dependencies; folder selection/cancel and Video/Audio mode switching.
+- The offscreen Qt window was rendered to inspect the layout; syntax checks passed.
+- During Step 2 testing, this host had FFmpeg/ffprobe and Python dependencies; Deno was reported missing. An installed Node fallback was added in Step 3.
+- Native Wayland/X11 sessions, Ubuntu, and real downloads have not yet been tested; those remained on later checklists.
 
-### Step 3 যাচাই — 2026-09-23
+### Step 3 verification — 2026-09-23
 
-- মোট 13টি automated test পাস: URL validation, audio/video pairing, DRM filtering, unknown size, MP3 estimate, playlist/live rejection, subprocess success/error/invalid JSON/cancel, responsive event loop, close cleanup, thumbnail failure এবং stale selection reset।
-- বাস্তব YouTube `jNQXAC9IVRw` link-এ “Me at the zoo” metadata, 10টি MP4 option ও 4টি MP3 bitrate option পাওয়া গেছে। Thumbnail fetch ও image decode সফল (20,969 bytes)। এটি ওই link-এর পরীক্ষার ফল, সব video-র format সংখ্যা নয়।
-- Unavailable YouTube `BaW_jenozKc` link-এর source error সঠিকভাবে report হয়েছে।
-- Step 3-এ headless UI render দেখে preview ও selection layout যাচাই করা হয়েছিল; সেই ধাপে media download করা হয়নি।
+- All 13 automated tests passed: URL validation, audio/video pairing, DRM filtering, unknown size, MP3 estimate, playlist/live rejection, subprocess success/error/invalid JSON/cancel, responsive event loop, close cleanup, thumbnail failure, and stale selection reset.
+- The real YouTube link `jNQXAC9IVRw` returned “Me at the zoo” metadata, 10 MP4 options, and 4 MP3 bitrate options. Thumbnail fetch and image decoding succeeded (20,969 bytes). These results apply to that link; they do not represent the number of formats available for all videos.
+- The unavailable YouTube link `BaW_jenozKc` reported the source error correctly.
+- The Step 3 headless UI render checked the preview and selection layout; no media was downloaded in that step.
 
-### Step 4 ব্যবহার ও যাচাই — 2026-09-23
+### Step 4 usage and verification — 2026-09-23
 
-- Download-এর সময় percentage, bytes, speed ও ETA বর্তমান stream-এর জন্য দেখায়। আলাদা video/audio download হলে পরের stream-এ percentage আবার শুরু হয়। Merge, conversion ও verification আলাদা status; অজানা total হলে indeterminate progress।
-- **Cancel download** worker এবং তার FFmpeg/ffprobe process group বন্ধ করে। **Retry / Resume** আগের link, format ও folder-ই ব্যবহার করে; source HTTP range/fragment resume সমর্থন করলে partial data reuse হয়। Conversion বন্ধ হলে সেটি আবার শুরু হয়।
-- Partial files নির্বাচিত folder-এর `.fvd-partials/`-এ থাকে। App restart-এর পরও একই link, format ও folder দিয়ে Download করলে resume করার চেষ্টা করে। Source-এ format বদলে গেলে আবার Analyze করতে হবে।
-- Output nonempty কি না, container, প্রয়োজনীয় audio/video streams এবং duration FFprobe দিয়ে পরীক্ষা করা হয়। যাচাই ব্যর্থ হলে Completed দেখায় না। এটি প্রতিটি file-এর full decode test নয়।
-- Verified output folder-এ publish হয়; একই নাম থাকলে `(1)`, `(2)` suffix যোগ হয়। বর্তমান atomic publication-এর জন্য destination filesystem-এ hard-link support প্রয়োজন (যেমন ext4/Btrfs); unsupported filesystem হলে error দেখাবে।
-- মোট 23টি automated test পাস। Local HTTP fixture-এ বাস্তব bytes download, আলাদা video/audio merge, MP3 conversion/bitrate, range resume, invalid output rejection, duplicate filename preservation, worker exit ও child-process cancellation পরীক্ষা হয়েছে। Tests localhost socket খোলে এবং FFmpeg/ffprobe প্রয়োজন।
-- বাস্তব YouTube “Me at the zoo” দিয়ে MP4 ও 128 kbps MP3 download সফল; দুটো output পুরো FFmpeg decode test পাস করেছে।
-- 720p–4K-এর বিস্তৃত পরীক্ষা, Ubuntu/Wayland/X11 release validation, queue/history ও speed tuning পরবর্তী ধাপে বাকি।
+- During a download, the app shows percentage, bytes, speed, and ETA for the current stream. Separate video/audio downloads restart the percentage for the next stream. Merge, conversion, and verification have separate statuses; unknown totals use indeterminate progress.
+- **Cancel download** stops the worker and its FFmpeg/ffprobe process group. **Retry / Resume** reuses the same link, format, and folder; partial data is reused when the source supports HTTP range/fragment resume. If conversion is interrupted, it starts again.
+- Partial files remain in `.fvd-partials/` inside the selected folder. After restarting the app, downloading again with the same link, format, and folder attempts to resume. If the source changes formats, analyze the link again.
+- FFprobe checks that the output is nonempty and has the required container, audio/video streams, and duration. A failed check is never marked Completed. This is not a full decode test of every file.
+- Verified output is published to the folder; if the name already exists, a `(1)`, `(2)` suffix is added. Atomic publication currently requires hard-link support on the destination filesystem (such as ext4/Btrfs); unsupported filesystems return an error.
+- All 23 automated tests passed. Local HTTP fixtures tested real byte downloads, separate video/audio merge, MP3 conversion/bitrate, range resume, invalid output rejection, duplicate filename preservation, worker exit, and child-process cancellation. Tests open a localhost socket and require FFmpeg/ffprobe.
+- MP4 and 128 kbps MP3 downloads from the real YouTube video “Me at the zoo” succeeded; both outputs passed a full FFmpeg decode test.
+- Broader 720p–4K testing, Ubuntu/Wayland/X11 release validation, queue/history, and speed tuning remained for later steps.
 
-### Step 5 ব্যবহার ও যাচাই
+### Step 5 usage and verification
 
-- **New download** tab-এ Analyze করে format/folder বেছে **Download / Add to queue** চাপুন। **Downloads & history** tab-এ প্রতিটি কাজের state, stream progress, speed ও ETA দেখা যায়। Download চলার সময় অন্য link Analyze করা যায়।
-- **Parallel fragments:** default 4, সীমা 1–16; supported fragmented streams-এর জন্য, নতুন queue entry-তে প্রযোজ্য। Direct single-file transfer-কে এটি স্বয়ংক্রিয়ভাবে split করে না।
-- **Simultaneous downloads:** default 2, সীমা 1–4, প্রতি window-তে। Limit কমালে চলমান কাজ বন্ধ হয় না; সেগুলো শেষ হলে কম limit মেনে নতুন কাজ শুরু হয়। দুই সীমা একসঙ্গে বাড়ালে connection ও CPU ব্যবহার বাড়বে।
-- Engine-এ speed cap নেই। HTTP/fragment/extractor retry সর্বোচ্চ 3 বার; retry delay 1, 2, 4 সেকেন্ড। Source server-এর limit থাকলে পুরো internet speed পাওয়া নিশ্চিত নয়।
-- Queue/history থেকে row select করে **Cancel selected**, **Retry / Resume**, **Open file**, **Open folder** ব্যবহার করুন। Retry আগের format/folder/settings ব্যবহার করে। একই কাজ চলমান বা queued থাকলে duplicate যোগ হয় না।
-- Save folder, concurrency settings এবং job history SQLite-এ থাকে: `$XDG_DATA_HOME/free-video-downloader/state.sqlite3`, default `~/.local/share/free-video-downloader/state.sqlite3`। Tests/isolated runs-এর জন্য `FVD_DATA_DIR` ব্যবহার করা যায়। পুরোনো Step 4 downloads history-তে নিজে থেকে import হয় না।
-- App বন্ধ করলে active jobs cancel এবং waiting jobs interrupted হয়। পরের launch-এ অসমাপ্ত কাজ নিজে থেকে download শুরু করে না; row select করে Retry / Resume করুন।
-- Folder-এ write check হয়। Estimated output size জানা থাকলে তার প্রায় দ্বিগুণ এবং 32 MiB reserve ধরে free-space preflight হয়; অজানা size-এ 32 MiB reserve check হয়। Transfer চলার সময়ও periodically free space পরীক্ষা হয়। Estimate download সফল হওয়ার নিশ্চয়তা নয়; disk-full/permission failure-এ error দেখায় ও partial data থাকে।
-- মোট 32টি automated test পাস। Local HLS fixture-এ default 4 fragments দিয়ে concurrent requests, live speed events ও verified output; HTTP 503-এর পরে বাস্তব 1s/2s backoff ও successful retry পরীক্ষা হয়েছে।
-- Queue limits/FIFO/cancel/retry/shutdown, settings/history restart, duplicate handling, missing files, low disk space ও permission errors পরীক্ষা হয়েছে। Desktop-open URL dispatch mock দিয়ে যাচাই; native desktop application launch-এর পূর্ণ পরীক্ষা Step 6-এ বাকি।
-- Downloads & history tab headless render করে দেখা হয়েছে। Controlled local network benchmark ও distribution-wide release সীমাগুলো Step 6-এ নথিভুক্ত।
+- In the **New download** tab, analyze a link, choose a format/folder, then click **Download / Add to queue**. The **Downloads & history** tab shows each job's state, stream progress, speed, and ETA. You can analyze another link while a download is running.
+- **Parallel fragments:** default 4, range 1–16; applies to supported fragmented streams and new queue entries. It does not automatically split a direct single-file transfer.
+- **Simultaneous downloads:** default 2, range 1–4 per window. Lowering the limit does not stop running jobs; new jobs start under the lower limit after they finish. Raising both limits increases connection and CPU use.
+- The engine has no speed cap. HTTP/fragment/extractor retries are limited to 3, with delays of 1, 2, and 4 seconds. The source server may prevent use of the full internet connection speed.
+- Select a row in the queue/history to use **Cancel selected**, **Retry / Resume**, **Open file**, or **Open folder**. Retry reuses the previous format/folder/settings. A job already queued or running is not added again.
+- The save folder, concurrency settings, and job history are stored in SQLite: `$XDG_DATA_HOME/free-video-downloader/state.sqlite3`, defaulting to `~/.local/share/free-video-downloader/state.sqlite3`. Tests/isolated runs can use `FVD_DATA_DIR`. Older Step 4 download history is not imported automatically.
+- When the app closes, active jobs are canceled and waiting jobs are marked interrupted. In the next launch, unfinished jobs do not start automatically; select a row and use Retry / Resume.
+- The app checks folder write access. When estimated output size is known, preflight requires about twice that size plus a 32 MiB reserve; for unknown sizes it checks a 32 MiB reserve. Free space is also checked periodically during transfer. Estimates do not guarantee a successful download; disk-full/permission failures show an error and leave partial data.
+- All 32 automated tests passed. A local HLS fixture with the default 4 fragments tested concurrent requests, live speed events, and verified output; HTTP 503 was followed by the actual 1s/2s backoff and a successful retry.
+- Queue limits/FIFO/cancel/retry/shutdown, settings/history restart, duplicate handling, missing files, low disk space, and permission errors were tested. Desktop-open URL dispatch was tested with a mock; full native desktop application launch remained for Step 6.
+- The Downloads & history tab was rendered headlessly. Controlled local network benchmark and distribution-wide release limitations are documented in Step 6.
 
 ### Step 6 release verification — 2026-09-26
 
-- Resolution selector-এ output container label যোগ হয়েছে। Selection source-এর available resolution-এ map হয়; download শেষে FFprobe-এ height/width না মিললে Completed হয় না। Full automated suite: 35 tests pass, including a synthetic 2160p selection/mismatch test and MP4/WebM/MKV playback validation using generated clips.
-- Real YouTube `ocVNYZ9O1G0` (“Big Buck Bunny [4k 2160p 60fps]”) link analyzed successfully. Available formats included 2160p, 1440p, 1080p and 720p, each at 60 fps. The best MP4 2160p stream reported no size. A WebM 2160p stream was reported at about 955 MB. 4K media download/playback was deliberately left unverified because the source is 635 seconds long and the MP4 size is unknown; the network may transfer over 1 GB. Another 4K test link was unavailable.
+- The resolution selector includes the output container. Selection maps to a resolution available from the source; after download, FFprobe prevents Completed status if height/width do not match. The full automated suite passed 35 tests, including a synthetic 2160p selection/mismatch test and playback validation of generated MP4/WebM/MKV clips.
+- The real YouTube link `ocVNYZ9O1G0` (“Big Buck Bunny [4k 2160p 60fps]”) analyzed successfully. Available formats included 2160p, 1440p, 1080p, and 720p, each at 60 fps. The best MP4 2160p stream did not report a size. A WebM 2160p stream was reported at about 955 MB. The 4K download/playback was deliberately left unverified because the source is 635 seconds long and the MP4 size is unknown; the network might transfer over 1 GB. Another 4K test link was unavailable.
 - Local generated MP4/WebM/MKV outputs were decoded end-to-end by FFmpeg. Real YouTube 4K metadata is verified; full 4K file download and playback are not.
 - The same synthetic HLS source with a 150 ms response delay per segment measured 0.88 s at 1 fragment and 0.43 s at 4 (2.07× in the final run). This demonstrates concurrency on a controlled localhost fixture. It is not a measurement of YouTube or the user's internet speed.
 - `uv build --offline` generated `dist/free_video_downloader-0.1.0.tar.gz` and `dist/free_video_downloader-0.1.0-py3-none-any.whl`. The source archive includes install/launch scripts.
 - `scripts/install-user.sh` installed a temporary user launcher and `.desktop` entry under a test home. `desktop-file-validate` passed, and the generated launcher opened the offscreen app. A fresh Python 3.14 environment installed the wheel; its app entry point launched with the existing locked Qt dependencies exposed only for offline validation.
-- The actual host is Arch Linux, Wayland, scale 1.25. The desktop-installed app stayed open in Wayland until its timed test stopped it. Ubuntu could not be tested because Docker socket access is denied. X11 is not active here. Native interactive folder/file opening and real downloads on both distributions remain to be checked.
-- To install for the current user from this checkout, first install `uv`, Python 3, FFmpeg/ffprobe and a supported JavaScript runtime, then run `./scripts/install-user.sh`. The script validates tools and does not install system packages. Ubuntu’s `python3` package may be older than the app’s `>=3.11` requirement; install a Python 3.11+ interpreter if so.
+- The actual host is Arch Linux, Wayland, scale 1.25. The desktop-installed app stayed open in Wayland until its timed test stopped it. Ubuntu could not be tested because Docker socket access was denied. X11 is not active here. Native interactive folder/file opening and real downloads on both distributions remain to be checked.
+- To install for the current user from this checkout, first install `uv`, Python 3, FFmpeg/ffprobe, and a supported JavaScript runtime, then run `./scripts/install-user.sh`. The script validates tools and does not install system packages. Ubuntu's `python3` package may be older than the app's `>=3.11` requirement; install a Python 3.11+ interpreter if so.
