@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QStandardPaths
+from PySide6.QtCore import Qt, QStandardPaths, QUrl, QUrlQuery
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (
     QComboBox, QDialog, QDialogButtonBox, QFileDialog, QFrame,
@@ -54,6 +54,7 @@ class MainWindow(QMainWindow):
         self.queue.idle.connect(self.queue_idle)
         self.job = None
         self.close_pending = False
+        self.external_auto_download = False
         self.info = None
         self.video_choices = []
         self.audio_choices = []
@@ -127,6 +128,7 @@ class MainWindow(QMainWindow):
         self.selection = label("Choose a link to see available formats.", True)
         layout.addWidget(self.selection)
         self.quality.currentIndexChanged.connect(self.selection_changed)
+        self.quality.activated.connect(self.quality_activated)
 
         layout.addWidget(label("Save to"))
         folder_row = QHBoxLayout()
@@ -161,6 +163,23 @@ class MainWindow(QMainWindow):
         layout.addStretch()
         self.refresh_dependencies()
 
+    def open_external_url(self, external_url):
+        parsed = QUrl(external_url)
+        if parsed.scheme().lower() != "free-video-downloader":
+            return False
+        query = QUrlQuery(parsed)
+        target_url = query.queryItemValue("url", QUrl.ComponentFormattingOption.FullyDecoded)
+        try:
+            target_url = validate_url(target_url)
+        except ValueError as error:
+            self.status.setText(f"Could not open browser video link: {error}")
+            return True
+        self.tabs.setCurrentIndex(0)
+        self.url.setText(target_url)
+        self.start_analysis()
+        self.external_auto_download = True
+        return True
+
     def update_mode(self):
         audio_mode = self.mode.currentData() == "audio"
         self.format_label.setText("MP3 bitrate" if audio_mode else "Resolution")
@@ -186,7 +205,13 @@ class MainWindow(QMainWindow):
             if self.info else "Choose a link to see available formats.")
         self.download.setEnabled(bool(choice) and self.job is None)
 
+    def quality_activated(self, *_):
+        if self.external_auto_download and self.quality.currentData():
+            self.external_auto_download = False
+            self.start_download()
+
     def link_changed(self):
+        self.external_auto_download = False
         self.thumbnail.cancel()
         self.info = None
         self.video_choices = []
@@ -231,7 +256,10 @@ class MainWindow(QMainWindow):
         self.preview.setText("Thumbnail unavailable")
         self.thumbnail.load(info.get("thumbnail"))
         self.update_mode()
-        self.status.setText("Analysis complete. Select a format and choose Download.")
+        self.status.setText(
+            "Analysis complete. Choose a quality to start downloading."
+            if self.external_auto_download else
+            "Analysis complete. Select a format and choose Download.")
 
     def analysis_finished(self):
         job, self.job = self.job, None
@@ -268,6 +296,7 @@ class MainWindow(QMainWindow):
         choice = self.quality.currentData()
         if not choice or self.job:
             return
+        self.external_auto_download = False
         config = {"url": self.url.text().strip(), "selector": choice.selector,
             "container": choice.container, "bitrate": choice.bitrate, "folder": self.folder.text(),
             "duration": self.info.get("duration") if self.info else None,

@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Free Video Downloader context menu",
+  "version": "1.0.0",
+  "description": "Send a video under the pointer to Free Video Downloader on Linux.",
+  "permissions": ["contextMenus"],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

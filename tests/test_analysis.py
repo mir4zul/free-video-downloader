@@ -151,6 +151,32 @@ class AsyncTests(unittest.TestCase):
         self.assertIsNone(window.job)
         window.close()
 
+    def test_browser_protocol_opens_link_and_starts_analysis(self):
+        window = MainWindow(Store(":memory:"))
+        def reset_auto_start():
+            window.external_auto_download = False
+
+        with patch.object(window, "start_analysis", side_effect=reset_auto_start) as analyze:
+            opened = window.open_external_url(
+                "free-video-downloader://download?url="
+                "https%3A%2F%2Fexample.com%2Fwatch%3Fa%3D1%26b%3D2")
+        self.assertTrue(opened)
+        self.assertEqual(window.url.text(), "https://example.com/watch?a=1&b=2")
+        analyze.assert_called_once_with()
+        self.assertTrue(window.external_auto_download)
+        self.assertFalse(window.open_external_url("https://example.com/video"))
+        window.close()
+
+    def test_browser_quality_selection_starts_download(self):
+        window = MainWindow(Store(":memory:"))
+        window.analysis_succeeded(sample())
+        window.external_auto_download = True
+        with patch.object(window, "start_download") as download:
+            window.quality.activated.emit(0)
+        download.assert_called_once_with()
+        self.assertFalse(window.external_auto_download)
+        window.close()
+
     def test_closing_window_cancels_running_process(self):
         window = MainWindow(Store(":memory:"))
         window.url.setText("https://example.com/video")

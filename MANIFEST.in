@@ -6,3 +6,4 @@ recursive-include scripts *.sh *.py
 recursive-include app *.py
 recursive-include tests *.py
 recursive-include app/assets *.svg
+recursive-include browser-extension *.json *.js

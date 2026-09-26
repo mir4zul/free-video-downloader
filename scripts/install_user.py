@@ -30,16 +30,22 @@ def main():
         "Type=Application\n"
         "Name=Free Video Downloader\n"
         "Comment=Download a video at the resolution you choose\n"
-        f'Exec="{executable}"\n'
+        f'Exec="{executable}" %u\n'
         "Terminal=false\n"
         f"Icon={icon_entry}\n"
+        "MimeType=x-scheme-handler/free-video-downloader;\n"
         "Categories=AudioVideo;Video;\n"
         "StartupNotify=true\n"
     )
     desktop.chmod(0o644)
+    import subprocess
+    xdg_mime = shutil.which("xdg-mime")
+    if xdg_mime:
+        subprocess.run([xdg_mime, "default", desktop.name,
+                        "x-scheme-handler/free-video-downloader"], check=False,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     desktop_database = shutil.which("update-desktop-database")
     if desktop_database:
-        import subprocess
         subprocess.run([desktop_database, str(applications)], check=False,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 

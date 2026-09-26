@@ -10,7 +10,8 @@ def main():
         return 1
     from app.ui.window import MainWindow
 
-    application = QApplication(sys.argv)
+    incoming_urls = sys.argv[1:]
+    application = QApplication(sys.argv[:1])
     application.setApplicationName("Free Video Downloader")
     application.setStyle("Fusion")
     from PySide6.QtGui import QIcon
@@ -18,6 +19,9 @@ def main():
     application.setWindowIcon(QIcon(str(icon_path)))
     window = MainWindow()
     window.show()
+    for incoming_url in incoming_urls:
+        if window.open_external_url(incoming_url):
+            break
     return application.exec()
 
 
