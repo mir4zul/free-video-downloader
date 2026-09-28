@@ -3,8 +3,8 @@ from pathlib import Path
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QBrush, QColor, QDesktopServices
 from PySide6.QtWidgets import (
-    QFrame, QHBoxLayout, QLabel, QPushButton, QSpinBox, QTreeWidget,
-    QTreeWidgetItem, QVBoxLayout, QWidget,
+    QFrame, QHBoxLayout, QLabel, QProgressBar, QPushButton, QSpinBox,
+    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
 from app.services.formats import duration_text, size_text
@@ -30,6 +30,11 @@ QTreeWidget#downloadList::item { padding: 8px 6px; border-bottom: 1px solid #253
 QTreeWidget#downloadList::item:selected { background: #263b53; color: #ffffff; }
 QTreeWidget#downloadList QHeaderView::section { background: #182235; color: #a7b6ce;
     border: 0; border-bottom: 1px solid #304059; padding: 9px 7px; font-weight: 700; }
+QProgressBar#rowProgress { border: 0; border-radius: 4px; background: #26354a;
+    min-height: 8px; max-height: 8px; }
+QProgressBar#rowProgress::chunk { border-radius: 4px; background: #6ee7c0; }
+QProgressBar#rowProgress[paused="true"]::chunk { background: #f5c76b; }
+QProgressBar#rowProgress[failed="true"]::chunk { background: #ff8a8a; }
 QSpinBox { min-width: 56px; }
 """
 
@@ -39,6 +44,7 @@ class QueuePanel(QWidget):
         super().__init__(parent)
         self.queue, self.store = queue, store
         self.rows = {}
+        self.progress_cells = {}
         self.current_view = "active"
         self.setStyleSheet(PANEL_STYLE)
 
@@ -228,6 +234,7 @@ class QueuePanel(QWidget):
                 row = QTreeWidgetItem(self.tree)
                 row.setData(0, Qt.ItemDataRole.UserRole, task["id"])
                 self.rows[task["id"]] = row
+                self.progress_cells[task["id"]] = self.create_progress_cell(task)
             config = task.get("config", {})
             title = config.get("title") or config.get("url", "Video")
             quality = config.get("quality") or config.get("container", "")
@@ -237,17 +244,8 @@ class QueuePanel(QWidget):
                             "completed": "Completed", "failed": "Failed",
                             "cancelled": "Cancelled", "interrupted": "Interrupted", "paused": "Paused"}
             row.setText(1, state_labels.get(state, state.title()))
-            event = task.get("event", {})
-            detail = task.get("message", "")
-            if event.get("type") == "progress" and state == "running":
-                total, done = event.get("total"), event.get("downloaded") or 0
-                percent = f"{min(100, done * 100 / total):.0f}% · " if total else ""
-                speed = f"{size_text(event['speed'])}/s" if event.get("speed") else "Speed unknown"
-                eta = duration_text(event["eta"]) if event.get("eta") is not None else "unknown"
-                size_total = size_text(total) if total else "Unknown size"
-                detail = f"{percent}{size_text(done)} / {size_total} · {speed} · ETA {eta}"
-            elif state == "completed":
-                detail = "Finished and verified"
+            detail, percent, indeterminate = self.progress_details(task, state)
+            self.update_progress_cell(task, state, detail, percent, indeterminate)
             row.setText(2, detail)
             row.setToolTip(0, config.get("url", ""))
             row.setToolTip(2, task.get("path") or detail)
@@ -278,6 +276,67 @@ class QueuePanel(QWidget):
                               and task["id"] not in self.queue.active if task else False)
         self.open_file.setEnabled(state == "completed")
         self.open_folder.setEnabled(bool(task))
+
+    def create_progress_cell(self, task):
+        cell = QWidget(self.tree)
+        cell.setMinimumHeight(28)
+        line = QHBoxLayout(cell)
+        line.setContentsMargins(5, 3, 6, 3)
+        line.setSpacing(10)
+        bar = QProgressBar(cell)
+        bar.setObjectName("rowProgress")
+        bar.setTextVisible(False)
+        bar.setAccessibleName(f"Download progress for {task.get('config', {}).get('title') or 'video'}")
+        bar.setRange(0, 100)
+        bar.setValue(0)
+        bar.setMinimumWidth(65)
+        bar.setMaximumWidth(115)
+        detail_label = QLabel(cell)
+        detail_label.setObjectName("muted")
+        detail_label.setMinimumWidth(40)
+        line.addWidget(bar)
+        line.addWidget(detail_label, 1)
+        self.tree.setItemWidget(self.rows[task["id"]], 2, cell)
+        return bar, detail_label
+
+    @staticmethod
+    def progress_details(task, state):
+        event = task.get("event", {})
+        progress = task.get("last_progress") or (event if event.get("type") == "progress" else {})
+        total = progress.get("total")
+        done = progress.get("downloaded") or 0
+        percent = min(100, int(done * 100 / total)) if total else 0
+        indeterminate = state == "running" and bool(progress) and not total
+        if state == "completed":
+            return "Finished and verified", 100, False
+        if state == "queued":
+            return task.get("message", "Waiting…"), 0, False
+        if state == "running" and progress:
+            speed = f"{size_text(progress['speed'])}/s" if progress.get("speed") else "Speed unknown"
+            eta = duration_text(progress["eta"]) if progress.get("eta") is not None else "unknown"
+            size_total = size_text(total) if total else "Unknown size"
+            amount = f"{size_text(done)} / {size_total}"
+            return f"{amount} · {speed} · ETA {eta}", percent, indeterminate
+        if progress:
+            detail = f"{size_text(done)} received"
+            if total:
+                detail = f"Paused at {percent}% · {detail}"
+            else:
+                detail = f"{state.title()} · {detail}"
+            return detail, percent, False
+        return task.get("message", ""), 0, False
+
+    def update_progress_cell(self, task, state, detail, percent, indeterminate):
+        bar, text = self.progress_cells[task["id"]]
+        bar.setRange(0, 0 if indeterminate else 100)
+        if not indeterminate:
+            bar.setValue(percent)
+        bar.setProperty("paused", state in ("paused", "interrupted", "cancelled"))
+        bar.setProperty("failed", state == "failed")
+        bar.style().unpolish(bar)
+        bar.style().polish(bar)
+        text.setText(detail)
+        text.setToolTip(detail)
 
     def retry_selected(self):
         task = self.selected()

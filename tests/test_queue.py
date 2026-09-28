@@ -100,6 +100,19 @@ class QueueTests(unittest.TestCase):
         self.queue.pump()
         self.assertEqual(task["state"], "running")
 
+    def test_progress_bar_keeps_progress_when_paused(self):
+        task = self.add("pause-with-progress")
+        self.queue.pump()
+        self.queue.receive(task, {"type": "progress", "total": 200, "downloaded": 50,
+                                  "speed": 25, "eta": 6})
+        panel = QueuePanel(self.queue, self.store)
+        bar, detail = panel.progress_cells[task["id"]]
+        self.assertEqual(bar.value(), 25)
+        self.queue.pause(task)
+        self.assertEqual(bar.value(), 25)
+        self.assertIn("Paused at 25%", detail.text())
+        panel.close()
+
     def test_open_missing_file_and_desktop_url(self):
         task = self.add("a")
         self.queue.cancel(task)

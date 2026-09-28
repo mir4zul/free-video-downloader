@@ -67,6 +67,8 @@ class DownloadQueue(QObject):
     def receive(self, task, event):
         kind = event.get("type")
         task["event"] = event
+        if kind == "progress":
+            task["last_progress"] = event
         if kind in ("completed", "failed", "cancelled"):
             if kind == "cancelled" and task.pop("pause_requested", False):
                 task.update(state="paused", message="Paused. Resume to continue the partial download.")
