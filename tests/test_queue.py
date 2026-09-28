@@ -113,6 +113,43 @@ class QueueTests(unittest.TestCase):
         self.assertIn("Paused at 25%", detail.text())
         panel.close()
 
+    def test_bulk_controls_and_history_deletion(self):
+        first, second = self.add("first"), self.add("second")
+        self.queue.pump()
+        self.queue.pause_all()
+        self.assertEqual([first["state"], second["state"]], ["paused", "paused"])
+        self.assertEqual(self.queue.resume_all(), 2)
+        self.queue.pump()
+        self.queue.cancel_all()
+        self.assertEqual([first["state"], second["state"]], ["cancelled", "cancelled"])
+        with tempfile.TemporaryDirectory() as directory:
+            downloaded = Path(directory) / "keep.mp4"
+            downloaded.write_bytes(b"saved media")
+            first.update(state="completed", path=str(downloaded))
+            self.store.save(first)
+            self.assertEqual(self.queue.clear_history(), 2)
+            self.assertTrue(downloaded.exists())
+        self.assertEqual(self.queue.tasks, [])
+        self.assertEqual(self.store.tasks(), [])
+
+    def test_delete_one_history_item_leaves_other_tasks(self):
+        first, second = self.add("first"), self.add("second")
+        self.queue.cancel(first)
+        self.assertTrue(self.queue.delete_history(first))
+        self.assertEqual([task["id"] for task in self.store.tasks()], [second["id"]])
+
+    def test_each_history_row_has_resume_and_delete_actions(self):
+        task = self.add("history-actions")
+        self.queue.cancel(task)
+        panel = QueuePanel(self.queue, self.store)
+        _, controls = panel.action_cells[task["id"]]
+        self.assertFalse(controls["pause"].isEnabled())
+        self.assertTrue(controls["resume"].isEnabled())
+        self.assertEqual(controls["resume"].text(), "Retry")
+        self.assertTrue(controls["delete"].isEnabled())
+        self.assertFalse(controls["cancel"].isEnabled())
+        panel.close()
+
     def test_open_missing_file_and_desktop_url(self):
         task = self.add("a")
         self.queue.cancel(task)

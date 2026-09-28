@@ -29,5 +29,12 @@ class Store:
         with self.db:
             self.db.execute("INSERT OR REPLACE INTO tasks VALUES (?,?)", (task["id"], json.dumps(task)))
 
+    def delete_tasks(self, task_ids):
+        ids = tuple(task_ids)
+        if not ids:
+            return
+        with self.db:
+            self.db.executemany("DELETE FROM tasks WHERE id=?", ((task_id,) for task_id in ids))
+
     def tasks(self):
         return [json.loads(row[0]) for row in self.db.execute("SELECT data FROM tasks ORDER BY rowid")]

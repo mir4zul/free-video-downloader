@@ -116,6 +116,54 @@ class DownloadQueue(QObject):
             self.changed.emit()
             job.cancel()
 
+    def pause_all(self):
+        for task in list(self.tasks):
+            if task["state"] in ("queued", "running"):
+                self.pause(task)
+
+    def cancel_all(self):
+        for task in list(self.tasks):
+            if task["state"] in ("queued", "running"):
+                self.cancel(task)
+
+    def resume_all(self):
+        resumed = 0
+        for task in list(self.tasks):
+            if task["state"] not in ("paused", "interrupted", "failed", "cancelled"):
+                continue
+            try:
+                self.retry(task)
+                if task["state"] == "queued":
+                    resumed += 1
+            except ValueError:
+                continue
+        return resumed
+
+    def delete_history(self, task):
+        if task not in self.tasks or task["state"] in ("queued", "running"):
+            return False
+        try:
+            self.store.delete_tasks([task["id"]])
+        except (sqlite3.Error, OSError) as error:
+            self.storage_error.emit("Could not delete history item: " + str(error))
+            return False
+        self.tasks.remove(task)
+        self.changed.emit()
+        return True
+
+    def clear_history(self):
+        history = [task for task in self.tasks if task["state"] not in ("queued", "running")]
+        if not history:
+            return 0
+        try:
+            self.store.delete_tasks([task["id"] for task in history])
+        except (sqlite3.Error, OSError) as error:
+            self.storage_error.emit("Could not clear download history: " + str(error))
+            return 0
+        self.tasks = [task for task in self.tasks if task["state"] in ("queued", "running")]
+        self.changed.emit()
+        return len(history)
+
     def retry(self, task):
         if task["id"] in self.active or task["state"] not in (
                 "paused", "failed", "cancelled", "interrupted"):

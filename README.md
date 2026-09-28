@@ -9,7 +9,7 @@ A free desktop app for downloading videos from YouTube and other websites suppor
 - Switch to **Audio only (MP3)** to extract audio from a supported video link; choose an MP3 bitrate.
 - Automatically select a suitable video container from the source formats. Video downloads may use MP4, WebM, or MKV; audio-only downloads use MP3.
 - Show download progress, speed, ETA, queue status, and processing state.
-- Queue downloads, limit simultaneous jobs and parallel fragments, pause or cancel jobs, and resume supported partial downloads later.
+- Queue downloads, limit simultaneous jobs and parallel fragments, pause or cancel individual or all jobs, resume supported partial downloads, and remove individual or all history entries without deleting saved media files.
 - Save download history and settings locally; open completed files or their folders.
 - Verify the completed file and selected resolution before marking a job complete.
 
