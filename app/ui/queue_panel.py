@@ -34,7 +34,7 @@ QWidget#rowActions QPushButton { font-size: 12px; padding: 4px 3px; min-width: 0
 QPushButton#dangerButton { color: #ffaaaa; }
 QPushButton#dangerButton:disabled { color: #8c9bb0; }
 QProgressBar#rowProgress { border: 0; border-radius: 4px; background: #26354a;
-    min-height: 8px; max-height: 8px; }
+    min-height: 6px; max-height: 6px; }
 QProgressBar#rowProgress::chunk { border-radius: 4px; background: #6ee7c0; }
 QProgressBar#rowProgress[paused="true"]::chunk { background: #f5c76b; }
 QProgressBar#rowProgress[failed="true"]::chunk { background: #ff8a8a; }
@@ -397,8 +397,8 @@ class QueuePanel(QWidget):
         bar.setAccessibleName(f"Download progress for {task.get('config', {}).get('title') or 'video'}")
         bar.setRange(0, 100)
         bar.setValue(0)
-        bar.setMinimumWidth(65)
-        bar.setMaximumWidth(115)
+        bar.setMinimumWidth(44)
+        bar.setMaximumWidth(72)
         detail_label = QLabel(cell)
         detail_label.setObjectName("muted")
         detail_label.setMinimumWidth(40)
