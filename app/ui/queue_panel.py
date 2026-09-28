@@ -155,12 +155,13 @@ class QueuePanel(QWidget):
 
         actions = QHBoxLayout()
         actions.addStretch(1)
+        self.pause = QPushButton("Pause")
         self.cancel = QPushButton("Cancel download")
         self.retry = QPushButton("Retry / resume")
         self.open_file = QPushButton("Open file")
         self.open_folder = QPushButton("Open folder")
         self.open_file.setObjectName("primary")
-        for button in (self.cancel, self.retry, self.open_file, self.open_folder):
+        for button in (self.pause, self.cancel, self.retry, self.open_file, self.open_folder):
             actions.addWidget(button)
         layout.addLayout(actions)
 
@@ -170,6 +171,7 @@ class QueuePanel(QWidget):
         self.message.setWordWrap(True)
         layout.addWidget(self.message)
 
+        self.pause.clicked.connect(lambda: self.queue.pause(self.selected()) if self.selected() else None)
         self.cancel.clicked.connect(lambda: self.queue.cancel(self.selected()) if self.selected() else None)
         self.retry.clicked.connect(self.retry_selected)
         self.open_file.clicked.connect(lambda: self.open_path(False))
@@ -209,7 +211,7 @@ class QueuePanel(QWidget):
         active_count = sum(task["state"] == "running" for task in self.queue.tasks)
         queued_count = sum(task["state"] == "queued" for task in self.queue.tasks)
         completed_count = sum(task["state"] == "completed" for task in self.queue.tasks)
-        attention_count = sum(task["state"] in ("failed", "cancelled", "interrupted")
+        attention_count = sum(task["state"] in ("paused", "failed", "cancelled", "interrupted")
                               for task in self.queue.tasks)
         self.stat_labels["running"].setText(str(active_count))
         self.stat_labels["queued"].setText(str(queued_count))
@@ -233,7 +235,7 @@ class QueuePanel(QWidget):
             state = task.get("state", "failed")
             state_labels = {"queued": "In queue", "running": "Downloading",
                             "completed": "Completed", "failed": "Failed",
-                            "cancelled": "Cancelled", "interrupted": "Paused"}
+                            "cancelled": "Cancelled", "interrupted": "Interrupted", "paused": "Paused"}
             row.setText(1, state_labels.get(state, state.title()))
             event = task.get("event", {})
             detail = task.get("message", "")
@@ -252,6 +254,7 @@ class QueuePanel(QWidget):
             row.setForeground(1, QBrush(QColor({
                 "running": "#6ee7c0", "queued": "#f5c76b", "completed": "#6ee7c0",
                 "failed": "#ff8a8a", "cancelled": "#a7b6ce", "interrupted": "#f5c76b",
+                "paused": "#f5c76b",
             }.get(state, "#e7edf7"))))
             row.setHidden(self.is_active(task) != (self.current_view == "active"))
 
@@ -269,8 +272,9 @@ class QueuePanel(QWidget):
     def update_actions(self):
         task = self.selected()
         state = task["state"] if task else ""
+        self.pause.setEnabled(state in ("queued", "running"))
         self.cancel.setEnabled(state in ("queued", "running"))
-        self.retry.setEnabled(state in ("failed", "cancelled", "interrupted")
+        self.retry.setEnabled(state in ("paused", "failed", "cancelled", "interrupted")
                               and task["id"] not in self.queue.active if task else False)
         self.open_file.setEnabled(state == "completed")
         self.open_folder.setEnabled(bool(task))

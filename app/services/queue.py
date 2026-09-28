@@ -20,6 +20,7 @@ class DownloadQueue(QObject):
         self.tasks = store.tasks()
         for task in self.tasks:
             if task["state"] in ("queued", "running"):
+                task.pop("pause_requested", None)
                 task.update(state="interrupted", message="Interrupted — choose Retry / Resume.")
                 self.persist(task)
 
@@ -67,7 +68,10 @@ class DownloadQueue(QObject):
         kind = event.get("type")
         task["event"] = event
         if kind in ("completed", "failed", "cancelled"):
-            task.update(state=kind, message=event.get("message", "Completed and verified"))
+            if kind == "cancelled" and task.pop("pause_requested", False):
+                task.update(state="paused", message="Paused. Resume to continue the partial download.")
+            else:
+                task.update(state=kind, message=event.get("message", "Completed and verified"))
             if kind == "completed":
                 task["path"] = event["path"]
                 task["completed"] = datetime.now(timezone.utc).isoformat()
@@ -96,14 +100,32 @@ class DownloadQueue(QObject):
             self.persist(task)
             self.changed.emit()
 
+    def pause(self, task):
+        if task["state"] == "queued":
+            task.update(state="paused", message="Paused before starting. Resume when ready.")
+            self.persist(task)
+            self.changed.emit()
+            return
+        job = self.active.get(task["id"])
+        if job and task["state"] == "running":
+            task["pause_requested"] = True
+            task.update(message="Pausing and saving resumable data…")
+            self.persist(task)
+            self.changed.emit()
+            job.cancel()
+
     def retry(self, task):
-        if task["id"] in self.active or task["state"] not in ("failed", "cancelled", "interrupted"):
+        if task["id"] in self.active or task["state"] not in (
+                "paused", "failed", "cancelled", "interrupted"):
             return
         signature = lambda c: tuple(c.get(k) for k in ("url", "selector", "container", "bitrate", "folder"))
         if any(t is not task and t["state"] in ("running", "queued") and
                signature(t["config"]) == signature(task["config"]) for t in self.tasks):
             raise ValueError("This format is already queued or downloading.")
-        task.update(state="queued", message="Waiting to retry…", event={})
+        was_paused = task["state"] == "paused"
+        task.pop("pause_requested", None)
+        task.update(state="queued", message="Waiting to resume…" if was_paused else "Waiting to retry…",
+                    event={})
         self.persist(task)
         self.changed.emit()
         QTimer.singleShot(0, self.pump)

@@ -79,14 +79,26 @@ class QueueTests(unittest.TestCase):
             first.set_setting("fragments", 8)
             first.save({"id": "a", "state": "running", "config": {}, "message": ""})
             first.save({"id": "b", "state": "completed", "config": {}, "path": "/tmp/done.mp4"})
+            first.save({"id": "c", "state": "paused", "config": {}, "message": "Paused"})
             first.db.close()
             second = Store(path)
             queue = DownloadQueue(second, factory=FakeJob)
             self.assertEqual(second.setting("fragments", 4), 8)
             self.assertEqual(queue.tasks[0]["state"], "interrupted")
             self.assertEqual(queue.tasks[1]["path"], "/tmp/done.mp4")
+            self.assertEqual(queue.tasks[2]["state"], "paused")
             self.assertFalse(queue.active)
             second.db.close()
+
+    def test_pause_keeps_task_resumable(self):
+        task = self.add("pause-me")
+        self.queue.pump()
+        self.queue.pause(task)
+        self.assertEqual(task["state"], "paused")
+        self.assertIn("partial download", task["message"])
+        self.queue.retry(task)
+        self.queue.pump()
+        self.assertEqual(task["state"], "running")
 
     def test_open_missing_file_and_desktop_url(self):
         task = self.add("a")
